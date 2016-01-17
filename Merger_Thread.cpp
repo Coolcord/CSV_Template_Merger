@@ -5,16 +5,8 @@ Merger_Thread::Merger_Thread(bool cli) {
     this->merger = new Merger(cli);
 }
 
-Merger_Thread::Merger_Thread(bool cli, QWidget *parent) {
-    this->merger = new Merger(cli, parent);
-}
-
 Merger_Thread::Merger_Thread(const QString &idFileLocation, const QString &templateFileLocation, const QString &outputFileLocation, bool cli) {
     this->merger = new Merger(idFileLocation, templateFileLocation, outputFileLocation, cli);
-}
-
-Merger_Thread::Merger_Thread(const QString &idFileLocation, const QString &templateFileLocation, const QString &outputFileLocation, bool cli, QWidget *parent) {
-    this->merger = new Merger(idFileLocation, templateFileLocation, outputFileLocation, cli, parent);
 }
 
 Merger_Thread::~Merger_Thread() {
@@ -35,7 +27,7 @@ void Merger_Thread::Set_Output_File_Location(const QString &outputFileLocation) 
 }
 
 void Merger_Thread::run() {
-    this->merger->Merge();
+    emit this->Merge_Completed(this->merger->Merge());
 }
 
 

@@ -8,8 +8,9 @@ QT       += core gui
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-TARGET = TemplateMerger
+TARGET = CSV_Template_Merger
 TEMPLATE = app
+CONFIG += c++11 pendantic Wall
 
 
 SOURCES += main.cpp\
@@ -21,6 +22,11 @@ SOURCES += main.cpp\
 HEADERS  += Main_Window.h \
     Merger.h \
     CSV_Helper.h \
-    Merger_Thread.h
+    Merger_Thread.h \
+    Error_Codes.h
 
 FORMS    += Main_Window.ui
+
+RC_FILE = CSV_Template_Merger.rc
+
+DISTFILES +=

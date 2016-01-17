@@ -1,5 +1,6 @@
 #include "Merger.h"
 #include "CSV_Helper.h"
+#include "Error_Codes.h"
 #include <iostream>
 #include <QByteArray>
 #include <QMap>
@@ -12,16 +13,6 @@ Merger::Merger(bool cli) {
     this->outputFileLocation = QString();
     this->cli = cli;
     this->csvHelper = new CSV_Helper();
-    this->parent = NULL;
-}
-
-Merger::Merger(bool cli, QWidget *parent) {
-    this->idFileLocation = QString();
-    this->templateFileLocation = QString();
-    this->outputFileLocation = QString();
-    this->cli = cli;
-    this->csvHelper = new CSV_Helper();
-    this->parent = parent;
 }
 
 Merger::Merger(const QString &idFileLocation, const QString &templateFileLocation, const QString &outputFileLocation, bool cli) {
@@ -30,57 +21,40 @@ Merger::Merger(const QString &idFileLocation, const QString &templateFileLocatio
     this->outputFileLocation = outputFileLocation;
     this->cli = cli;
     this->csvHelper = new CSV_Helper();
-    this->parent = NULL;
 }
 
-Merger::Merger(const QString &idFileLocation, const QString &templateFileLocation, const QString &outputFileLocation, bool cli, QWidget *parent) {
-    assert(parent);
-    this->idFileLocation = idFileLocation;
-    this->templateFileLocation = templateFileLocation;
-    this->outputFileLocation = outputFileLocation;
-    this->cli = cli;
-    this->csvHelper = new CSV_Helper();
-    this->parent = parent;
-}
-
-bool Merger::Merge() {
+int Merger::Merge() {
     //Open the ID file for reading
     QFile sourceFile(this->idFileLocation);
     if (!sourceFile.exists()) { //ID file does not exist
-        this->Show_Error_Message("Unable to open the ID file! Try closing any programs that might be using it.");
-        return false;
+        return Error_Codes::UNABLE_TO_OPEN_ID_FILE;
     }
     if (!sourceFile.open(QFile::ReadOnly)) {
-        this->Show_Error_Message("Unable to read the ID file! Try closing any programs that might be using it.");
-        return false;
+        return Error_Codes::UNABLE_TO_READ_ID_FILE;
     }
 
     //Open the Template file for reading
     QFile templateFile(this->templateFileLocation);
     if (!templateFile.exists()) { //template file does not exist
-        this->Show_Error_Message("Unable to open the template file! Try closing any programs that might be using it.");
         sourceFile.close();
-        return false;
+        return Error_Codes::UNABLE_TO_OPEN_TEMPLATE_FILE;
     }
     if (!templateFile.open(QFile::ReadOnly)) {
-        this->Show_Error_Message("Unable to read the template file! Try closing any programs that might be using it.");
         sourceFile.close();
-        return false;
+        return Error_Codes::UNABLE_TO_READ_TEMPLATE_FILE;
     }
 
     //Create a new file for output
     QFile outputFile(this->outputFileLocation);
     if (outputFile.exists()) {
         if (!outputFile.remove()) {
-            this->Show_Error_Message("Unable to write the output file!");
-            return false;
+            return Error_Codes::UNABLE_TO_WRITE_OUTPUT_FILE;
         }
     }
     if (!outputFile.open(QFile::ReadWrite)) {
-        this->Show_Error_Message("Unable to create the output file!");
         sourceFile.close();
         templateFile.close();
-        return false;
+        return Error_Codes::UNABLE_TO_CREATE_OUTPUT_FILE;
     }
 
     //Read the template headers and insert them into a hash for searching
@@ -118,22 +92,15 @@ bool Merger::Merge() {
         for (QString templateLine = templateFile.readLine(); !templateFile.atEnd(); templateLine = templateFile.readLine()) {
             if (outputFile.write(this->Merge_Line(sourceIndexesInTemplate, sourceLine, templateLine).toUtf8().data()) == -1
                     || outputFile.write(QByteArray(NEW_LINE.toUtf8().data())) == -1) {
-                this->Show_Error_Message("Unable to create the output file!");
                 outputFile.close();
                 outputFile.remove();
-                return false;
+                return Error_Codes::UNABLE_TO_CREATE_OUTPUT_FILE;
             }
         }
     }
 
     //The merge was completed successfully
-    if (!this->cli) {
-        QMessageBox::information(this->parent, "CSV Template Merger",
-                                 "The new merged file was created successfully!", "OK");
-    } else {
-        std::cout << "The new merged file was created successfully!" << std::endl;
-    }
-    return true;
+    return Error_Codes::SUCCESS;
 }
 
 void Merger::Set_ID_File_Location(const QString &idFileLocation) {
@@ -178,13 +145,4 @@ QString Merger::Merge_Line(QVector<int> &sourceIndexesInTemplate, const QString 
         }
     }
     return mergedLine;
-}
-
-void Merger::Show_Error_Message(const QString &message) {
-    if (this->cli) {
-        QMessageBox::critical(this->parent, "CSV Template Merger",
-                              message, "OK");
-    } else {
-        std::cerr << message.toUtf8().data() << std::endl;
-    }
 }

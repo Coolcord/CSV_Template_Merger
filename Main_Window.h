@@ -1,6 +1,7 @@
 #ifndef MAIN_WINDOW_H
 #define MAIN_WINDOW_H
 
+#include "Error_Codes.h"
 #include <QDialog>
 #include <QString>
 
@@ -26,6 +27,7 @@ private slots:
     void on_leIDFileLocation_textChanged();
     void on_leTemplateFileLocation_textChanged();
     void on_leOutputFileLocation_textChanged();
+    void on_Merge_Completed(int errorCode);
 
 private:
     QString Get_Open_File_Location();

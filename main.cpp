@@ -1,6 +1,8 @@
 #include "Main_Window.h"
 #include "Merger.h"
+#include "Error_Codes.h"
 #include <QApplication>
+#include <QString>
 #include <iostream>
 
 int main(int argc, char *argv[]) {
@@ -12,8 +14,15 @@ int main(int argc, char *argv[]) {
     } else if (argc == 4) { //CLI mode
         QApplication a(argc, argv);
         Merger merger(argv[1], argv[2], argv[3], true);
-        if (merger.Merge()) return 0;
-        else return 1;
+
+        //Perform the merge over command line
+        int errorCode = merger.Merge();
+        if (errorCode == Error_Codes::SUCCESS) {
+            std::cout << Error_Codes::Get_Error_Message(errorCode).toUtf8().data() << std::endl;
+        } else {
+            std::cerr << Error_Codes::Get_Error_Message(errorCode).toUtf8().data() << std::endl;
+        }
+        return errorCode;
     }
 
     //Improper number of command line arguments

@@ -10,7 +10,8 @@ Main_Window::Main_Window(QWidget *parent) :
     ui(new Ui::Main_Window) {
     this->ui->setupUi(this);
     this->Toggle_Generate_Button();
-    this->mergerThread = new Merger_Thread(false, this);
+    this->mergerThread = new Merger_Thread(false);
+    this->connect(this->mergerThread, SIGNAL(Merge_Completed(int)), this, SLOT(on_Merge_Completed(int)));
 }
 
 Main_Window::~Main_Window() {
@@ -93,6 +94,7 @@ QString Main_Window::Get_Save_File_Location() {
 }
 
 void Main_Window::Toggle_Generate_Button() {
+    if (this->ui->btnGenerate->text() == "Generating...") return;
     this->ui->btnGenerate->setEnabled(!this->ui->leIDFileLocation->text().isEmpty()
                                       && !this->ui->leTemplateFileLocation->text().isEmpty()
                                       && !this->ui->leOutputFileLocation->text().isEmpty());
@@ -132,4 +134,16 @@ void Main_Window::on_leTemplateFileLocation_textChanged() {
 
 void Main_Window::on_leOutputFileLocation_textChanged() {
     this->Toggle_Generate_Button();
+}
+
+void Main_Window::on_Merge_Completed(int errorCode) {
+    if (errorCode == Error_Codes::SUCCESS) {
+        QMessageBox::information(this, "CSV Template Merger",
+                                 Error_Codes::Get_Error_Message(errorCode), "OK");
+    } else {
+        QMessageBox::critical(this, "CSV Template Merger",
+                              Error_Codes::Get_Error_Message(errorCode), "OK");
+    }
+    this->ui->btnGenerate->setText("Generate");
+    this->ui->btnGenerate->setEnabled(true);
 }

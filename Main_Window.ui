@@ -13,6 +13,10 @@
   <property name="windowTitle">
    <string>CSV Template Merger</string>
   </property>
+  <property name="windowIcon">
+   <iconset>
+    <normaloff>Template_Merger_Icon.ico</normaloff>Template_Merger_Icon.ico</iconset>
+  </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <layout class="QVBoxLayout" name="verticalLayout_2">
