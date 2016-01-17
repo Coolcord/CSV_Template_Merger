@@ -141,13 +141,13 @@ QString Merger::Merge_Line(QVector<int> &sourceIndexesInTemplate, QVector<QStrin
         if (sourceIndexesInTemplate[i] == -1) {
             if (firstLine) { //fix the header
                 templateElements.prepend(sourceHeaders[i]);
+                //Fix the indexes before moving on
+                for (int j = 0; j < sourceIndexesInTemplate.size(); ++j) {
+                    if (sourceIndexesInTemplate[j] == -1) continue;
+                    else ++sourceIndexesInTemplate[j];
+                }
             } else { //add the element to the beginning of the line
                 templateElements.prepend(sourceElements[i]);
-            }
-            //Fix the indexes before moving on
-            for (int j = 0; j < sourceIndexesInTemplate.size(); ++j) {
-                if (sourceIndexesInTemplate[j] == -1) continue;
-                else ++sourceIndexesInTemplate[j];
             }
         } else { //replace the existing element
             if (firstLine) {
