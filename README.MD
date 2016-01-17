@@ -40,7 +40,7 @@ Random Level Generator and Level Script Compiler for Super Mario Bros. 1 on the 
 
  The application can be run with no arguments for a GUI or can be run over command line
  using the following syntax:
- CSV_Template_Merger.exe <ID_file> <template_file> <output_file>
+ CSV_Template_Merger.exe "ID_file" "template_file" "output_file"
 
  Windows, Mac, and Linux users should compile the application through QtCreator.
  As I highly doubt many people will find use of this application, I do not intend to maintain
