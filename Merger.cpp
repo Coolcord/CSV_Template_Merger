@@ -58,14 +58,16 @@ int Merger::Merge() {
     }
 
     //Read the template headers and insert them into a hash for searching
-    QVector<QString> templateHeaders = this->csvHelper->Get_CSV_Elements_From_Line_As_Vector(templateFile.readLine().toLower());
+    QString templateHeaderLine = templateFile.readLine();
+    QVector<QString> templateHeaders = this->csvHelper->Get_CSV_Elements_From_Line_As_Vector(templateHeaderLine.toLower());
     QMap<QString, int> templateHeadersHash;
     for (int i = 0; i < templateHeaders.size(); ++i) {
         templateHeadersHash.insert(templateHeaders[i].toLower(), i);
     }
 
     //Read the source headers and determine their index in the template file
-    QVector<QString> sourceHeaders = this->csvHelper->Get_CSV_Elements_From_Line_As_Vector(sourceFile.readLine().toLower());
+    QString sourceHeaderLine = sourceFile.readLine();
+    QVector<QString> sourceHeaders = this->csvHelper->Get_CSV_Elements_From_Line_As_Vector(sourceHeaderLine.toLower());
     QVector<int> sourceIndexesInTemplate;
     QMap<int, int> sourceIndexesInTemplateHash;
     for (int i = 0; i < sourceHeaders.size(); ++i) {
@@ -84,13 +86,20 @@ int Merger::Merge() {
     }
     assert(sourceHeaders.size() == sourceIndexesInTemplate.size());
 
-    //Generate the output file
-    //TODO: Fix header writing!
+    //Generate the header
+    if (outputFile.write(QByteArray(this->Merge_Line(sourceIndexesInTemplate, sourceHeaders, sourceHeaderLine, templateHeaderLine, true).toUtf8().data())) == -1
+            || outputFile.write(QByteArray(NEW_LINE.toUtf8().data())) == -1) {
+        outputFile.close();
+        outputFile.remove();
+        return Error_Codes::UNABLE_TO_CREATE_OUTPUT_FILE;
+    }
+
+    //Generate the body
     for (QString sourceLine = sourceFile.readLine(); !sourceFile.atEnd(); sourceLine = sourceFile.readLine()) {
         templateFile.reset(); //start at the beginning of the template file
-        bool firstLine = true;
+        templateFile.readLine();
         for (QString templateLine = templateFile.readLine(); !templateFile.atEnd(); templateLine = templateFile.readLine()) {
-            if (outputFile.write(QByteArray(this->Merge_Line(sourceIndexesInTemplate, sourceHeaders, sourceLine, templateLine, firstLine).toUtf8().data())) == -1
+            if (outputFile.write(QByteArray(this->Merge_Line(sourceIndexesInTemplate, sourceHeaders, sourceLine, templateLine, false).toUtf8().data())) == -1
                     || outputFile.write(QByteArray(NEW_LINE.toUtf8().data())) == -1) {
                 outputFile.close();
                 outputFile.remove();
@@ -115,7 +124,7 @@ void Merger::Set_Output_File_Location(const QString &outputFileLocation) {
     this->outputFileLocation = outputFileLocation;
 }
 
-QString Merger::Merge_Line(QVector<int> &sourceIndexesInTemplate, QVector<QString> &sourceHeaders, const QString sourceLine, const QString &templateLine, bool &firstLine) {
+QString Merger::Merge_Line(QVector<int> &sourceIndexesInTemplate, QVector<QString> &sourceHeaders, const QString sourceLine, const QString &templateLine, bool firstLine) {
     QString mergedLine = QString();
     QVector<QString> sourceElements = this->csvHelper->Get_CSV_Elements_From_Line_As_Vector(sourceLine);
     QVector<QString> templateElements = this->csvHelper->Get_CSV_Elements_From_Line_As_Vector(templateLine);
@@ -157,6 +166,6 @@ QString Merger::Merge_Line(QVector<int> &sourceIndexesInTemplate, QVector<QStrin
             mergedLine += templateElements[i] + ",";
         }
     }
-    firstLine = false;
+
     return mergedLine;
 }

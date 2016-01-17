@@ -18,7 +18,7 @@ public:
     void Set_Output_File_Location(const QString &outputFileLocation);
 
 private:
-    QString Merge_Line(QVector<int> &sourceIndexesInTemplate, QVector<QString> &sourceHeaders, const QString sourceLine, const QString &templateLine, bool &firstLine);
+    QString Merge_Line(QVector<int> &sourceIndexesInTemplate, QVector<QString> &sourceHeaders, const QString sourceLine, const QString &templateLine, bool firstLine);
 
     QString idFileLocation;
     QString templateFileLocation;

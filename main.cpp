@@ -16,6 +16,7 @@ int main(int argc, char *argv[]) {
         Merger merger(argv[1], argv[2], argv[3], true);
 
         //Perform the merge over command line
+        std::cout << "Generating..." << std::endl;
         int errorCode = merger.Merge();
         if (errorCode == Error_Codes::SUCCESS) {
             std::cout << Error_Codes::Get_Error_Message(errorCode).toUtf8().data() << std::endl;
