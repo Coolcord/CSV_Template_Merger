@@ -86,11 +86,11 @@ int Merger::Merge() {
 
     //Generate the output file
     //TODO: Fix header writing!
-    //TODO: Make an icon!
     for (QString sourceLine = sourceFile.readLine(); !sourceFile.atEnd(); sourceLine = sourceFile.readLine()) {
         templateFile.reset(); //start at the beginning of the template file
+        bool firstLine = true;
         for (QString templateLine = templateFile.readLine(); !templateFile.atEnd(); templateLine = templateFile.readLine()) {
-            if (outputFile.write(this->Merge_Line(sourceIndexesInTemplate, sourceLine, templateLine).toUtf8().data()) == -1
+            if (outputFile.write(QByteArray(this->Merge_Line(sourceIndexesInTemplate, sourceHeaders, sourceLine, templateLine, firstLine).toUtf8().data())) == -1
                     || outputFile.write(QByteArray(NEW_LINE.toUtf8().data())) == -1) {
                 outputFile.close();
                 outputFile.remove();
@@ -115,24 +115,37 @@ void Merger::Set_Output_File_Location(const QString &outputFileLocation) {
     this->outputFileLocation = outputFileLocation;
 }
 
-QString Merger::Merge_Line(QVector<int> &sourceIndexesInTemplate, const QString sourceLine, const QString &templateLine) {
+QString Merger::Merge_Line(QVector<int> &sourceIndexesInTemplate, QVector<QString> &sourceHeaders, const QString sourceLine, const QString &templateLine, bool &firstLine) {
     QString mergedLine = QString();
     QVector<QString> sourceElements = this->csvHelper->Get_CSV_Elements_From_Line_As_Vector(sourceLine);
     QVector<QString> templateElements = this->csvHelper->Get_CSV_Elements_From_Line_As_Vector(templateLine);
+
+    //Add empty header elements to ensure that the source headers and elements match up
+    while (firstLine && sourceHeaders.size() < sourceElements.size()) {
+        sourceHeaders.append("");
+    }
 
     //Update the template elements
     assert(sourceElements.size() == sourceIndexesInTemplate.size());
     for (int i = sourceElements.size()-1; i >= 0; --i) {
         //Insert at the beginning
         if (sourceIndexesInTemplate[i] == -1) {
-            templateElements.prepend(sourceElements[i]);
+            if (firstLine) { //fix the header
+                templateElements.prepend(sourceHeaders[i]);
+            } else { //add the element to the beginning of the line
+                templateElements.prepend(sourceElements[i]);
+            }
             //Fix the indexes before moving on
             for (int j = 0; j < sourceIndexesInTemplate.size(); ++j) {
                 if (sourceIndexesInTemplate[j] == -1) continue;
                 else ++sourceIndexesInTemplate[j];
             }
         } else { //replace the existing element
-            templateElements[sourceIndexesInTemplate[i]] = sourceElements[i];
+            if (firstLine) {
+                templateElements[sourceIndexesInTemplate[i]] = sourceHeaders[i];
+            } else {
+                templateElements[sourceIndexesInTemplate[i]] = sourceElements[i];
+            }
         }
     }
 
@@ -144,5 +157,6 @@ QString Merger::Merge_Line(QVector<int> &sourceIndexesInTemplate, const QString 
             mergedLine += templateElements[i] + ",";
         }
     }
+    firstLine = false;
     return mergedLine;
 }
