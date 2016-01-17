@@ -8,28 +8,28 @@ Random Level Generator and Level Script Compiler for Super Mario Bros. 1 on the 
  This is a simple program I wrote for work to help with keeping our CSV data files
  at a small size. The idea is to break up redundant rows into templates and "ID files".
 
- For example:
- -===========================-
- ID File Contains:
- ID
- 1
- 2
+ For example:  
+ -===========================-  
+ ID File Contains:  
+ ID  
+ 1  
+ 2  
  3
-
- Template File Contains:
- Name,City
- Bob,SF
- Sue,LA
-
- The output file will be:
- ID,Name,City
- 1,Bob,SF
- 1,Sue,LA
- 2,Bob,SF
- 2,Sue,LA
- 3,Bob,SF
- 3,Sue,LA
- -===========================-
+ 
+ Template File Contains:  
+ Name,City  
+ Bob,SF  
+ Sue,LA  
+ 
+ The output file will be:  
+ ID,Name,City  
+ 1,Bob,SF  
+ 1,Sue,LA  
+ 2,Bob,SF  
+ 2,Sue,LA  
+ 3,Bob,SF  
+ 3,Sue,LA  
+ -===========================-  
 
  Keep in mind that the ID file can contain multiple columns if necessary.
 
