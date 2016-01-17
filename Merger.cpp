@@ -91,6 +91,8 @@ int Merger::Merge() {
     //Generate the header
     if (outputFile.write(QByteArray(this->Merge_Line(sourceIndexesInTemplate, sourceHeaders, sourceHeaderLine, templateHeaderLine, true).toUtf8().data())) == -1
             || outputFile.write(QByteArray(NEW_LINE.toUtf8().data())) == -1) {
+        sourceFile.close();
+        templateFile.close();
         outputFile.close();
         outputFile.remove();
         return Error_Codes::UNABLE_TO_CREATE_OUTPUT_FILE;
@@ -103,6 +105,8 @@ int Merger::Merge() {
         for (QString templateLine = templateFile.readLine(); !templateFile.atEnd(); templateLine = templateFile.readLine()) {
             if (outputFile.write(QByteArray(this->Merge_Line(sourceIndexesInTemplate, sourceHeaders, sourceLine, templateLine, false).toUtf8().data())) == -1
                     || outputFile.write(QByteArray(NEW_LINE.toUtf8().data())) == -1) {
+                sourceFile.close();
+                templateFile.close();
                 outputFile.close();
                 outputFile.remove();
                 return Error_Codes::UNABLE_TO_CREATE_OUTPUT_FILE;
@@ -111,6 +115,11 @@ int Merger::Merge() {
     }
 
     //The merge was completed successfully
+    sourceFile.close();
+    templateFile.close();
+    outputFile.close();
+
+    //TODO: Add multi-file support
     return Error_Codes::SUCCESS;
 }
 
