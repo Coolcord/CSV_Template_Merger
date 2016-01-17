@@ -152,6 +152,11 @@ QString Merger::Merge_Line(QVector<int> &sourceIndexesInTemplate, QVector<QStrin
                 templateElements.prepend(sourceElements[i]);
             }
         } else { //replace the existing element
+            //Add empty columns if necessary
+            while (sourceIndexesInTemplate[i] > templateElements.size()-1) {
+                templateElements.append("");
+            }
+            //Replace the data
             if (firstLine) {
                 templateElements[sourceIndexesInTemplate[i]] = sourceHeaders[i];
             } else {
