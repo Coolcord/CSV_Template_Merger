@@ -28,6 +28,7 @@ void Main_Window::on_btnGenerate_clicked() {
     this->mergerThread->Set_ID_File_Location(this->ui->leIDFileLocation->text());
     this->mergerThread->Set_Template_File_Location(this->ui->leTemplateFileLocation->text());
     this->mergerThread->Set_Output_File_Location(this->ui->leOutputFileLocation->text());
+    this->mergerThread->Set_Multi_File_Mode(this->ui->cbMultipleFiles->isChecked());
     this->mergerThread->start();
 }
 
@@ -58,7 +59,10 @@ void Main_Window::on_btnTemplateFileLocation_clicked() {
 }
 
 void Main_Window::on_btnOutputFileLocation_clicked() {
-    QString fileLocation = this->Get_Save_File_Location();
+    QString fileLocation;
+    if (this->ui->cbMultipleFiles->isChecked()) fileLocation = this->Get_Save_Folder_Location();
+    else fileLocation = this->Get_Save_File_Location();
+
     if (this->Is_File_Used(fileLocation)) {
         QMessageBox::critical(this, "CSV Template Merger",
                               "Don't overwrite the ID or template files!", "OK");
@@ -82,19 +86,37 @@ QString Main_Window::Get_Save_File_Location() {
     QString saveLocation = QFileDialog::getSaveFileName(this, "Save Location", this->lastFolder, "CSV files (*.csv);;All files (*.*)");
     if (saveLocation == NULL || saveLocation.isEmpty()) return QString();
     QFileInfo file(saveLocation);
-    QDir dir = file.dir();
     if (file.isDir()) {
         QMessageBox::critical(this, "CSV Template Merger",
                               file.fileName() + " is a directory!", "OK");
         return QString();
     }
-    if (!dir.exists()) {
+    if (!file.exists()) {
         QMessageBox::critical(this, "CSV Template Merger",
                               file.fileName() + " does not exist!", "OK");
         return QString();
     }
 
     this->lastFolder = file.path();
+    return saveLocation;
+}
+
+QString Main_Window::Get_Save_Folder_Location() {
+    QString saveLocation = QFileDialog::getExistingDirectory(this, "Save Location", this->lastFolder, QFileDialog::ShowDirsOnly);
+    if (saveLocation == NULL || saveLocation.isEmpty()) return QString();
+    QFileInfo folder(saveLocation);
+    if (!folder.isDir()) {
+        QMessageBox::critical(this, "CSV Template Merger",
+                              folder.fileName() + " is not a folder!", "OK");
+        return QString();
+    }
+    if (!folder.exists()) {
+        QMessageBox::critical(this, "CSV Template Merger",
+                              folder.fileName() + " does not exist!", "OK");
+        return QString();
+    }
+
+    this->lastFolder = folder.path();
     return saveLocation;
 }
 
@@ -151,4 +173,10 @@ void Main_Window::on_Merge_Completed(int errorCode) {
     }
     this->ui->btnGenerate->setText("Generate");
     this->ui->btnGenerate->setEnabled(true);
+}
+
+void Main_Window::on_cbMultipleFiles_toggled(bool checked) {
+    if (checked) this->ui->lblOutputFile->setText("Ouput Folder:");
+    else this->ui->lblOutputFile->setText("Ouput File:");
+    this->ui->leOutputFileLocation->setText(QString());
 }

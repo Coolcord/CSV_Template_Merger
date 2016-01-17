@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>257</height>
+    <height>284</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -121,9 +121,19 @@
    <item>
     <layout class="QVBoxLayout" name="verticalLayout_4">
      <item>
+      <widget class="QCheckBox" name="cbMultipleFiles">
+       <property name="text">
+        <string>Generate Multiple Files</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QLabel" name="lblOutputFile">
        <property name="text">
-        <string>Output File:</string>
+        <string>Output Folder:</string>
        </property>
       </widget>
      </item>

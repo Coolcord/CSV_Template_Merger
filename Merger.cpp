@@ -11,13 +11,15 @@ Merger::Merger() {
     this->idFileLocation = QString();
     this->templateFileLocation = QString();
     this->outputFileLocation = QString();
+    this->multiFileMode = true;
     this->csvHelper = new CSV_Helper();
 }
 
-Merger::Merger(const QString &idFileLocation, const QString &templateFileLocation, const QString &outputFileLocation) {
+Merger::Merger(const QString &idFileLocation, const QString &templateFileLocation, const QString &outputFileLocation, bool multiFileMode) {
     this->idFileLocation = idFileLocation;
     this->templateFileLocation = templateFileLocation;
     this->outputFileLocation = outputFileLocation;
+    this->multiFileMode = multiFileMode;
     this->csvHelper = new CSV_Helper();
 }
 
@@ -133,6 +135,10 @@ void Merger::Set_Template_File_Location(const QString &templateFileLocation) {
 
 void Merger::Set_Output_File_Location(const QString &outputFileLocation) {
     this->outputFileLocation = outputFileLocation;
+}
+
+void Merger::Set_Multi_File_Mode(bool multiFileMode) {
+    this->multiFileMode = multiFileMode;
 }
 
 QString Merger::Merge_Line(QVector<int> &sourceIndexesInTemplate, QVector<QString> &sourceHeaders, const QString sourceLine, const QString &templateLine, bool firstLine) {

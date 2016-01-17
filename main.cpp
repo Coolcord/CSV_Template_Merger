@@ -2,6 +2,7 @@
 #include "Merger.h"
 #include "Error_Codes.h"
 #include <QApplication>
+#include <QFileInfo>
 #include <QMessageBox>
 #include <QDebug>
 #include <QString>
@@ -13,7 +14,9 @@ int main(int argc, char *argv[]) {
         w.show();
         return a.exec();
     } else if (argc == 4) { //CLI mode
-        Merger merger(argv[1], argv[2], argv[3]);
+        QString outputPath = QString(argv[3]);
+        QFileInfo outputLocation(outputPath);
+        Merger merger(argv[1], argv[2], argv[3], (outputLocation.exists() && outputLocation.isDir()));
 
         //Perform the merge over command line
         qDebug() << "Generating...";
@@ -40,9 +43,11 @@ int main(int argc, char *argv[]) {
     //Improper number of command line arguments
     #ifdef Q_OS_WIN32
     QMessageBox::information(a.activeWindow(), "CSV Template Merger",
-                             QString(argv[0]) + " <ID_file> <template_file> <output_file>", "OK");
+                             QString(argv[0]) + " <ID_file> <template_file> <output_file>\n" +
+                             QString(argv[0]) + " <ID_file> <template_file> <output_folder>", "OK");
     #else
     qDebug() << argv[0] << " <ID_file> <template_file> <output_file>";
+    qDebug() << argv[0] << " <ID_file> <template_file> <output_folder>";
     #endif
     return 0;
 }

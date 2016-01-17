@@ -11,11 +11,12 @@ class Merger_Thread : public QThread {
 
 public:
     Merger_Thread();
-    Merger_Thread(const QString &idFileLocation, const QString &templateFileLocation, const QString &outputFileLocation);
+    Merger_Thread(const QString &idFileLocation, const QString &templateFileLocation, const QString &outputFileLocation, bool multiFileMode);
     ~Merger_Thread();
     void Set_ID_File_Location(const QString &idFileLocation);
     void Set_Template_File_Location(const QString &templateFileLocation);
     void Set_Output_File_Location(const QString &outputFileLocation);
+    void Set_Multi_File_Mode(bool multiFileMode);
 
 signals:
     void Merge_Completed(int errorCode);
