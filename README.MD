@@ -9,7 +9,7 @@ Random Level Generator and Level Script Compiler for Super Mario Bros. 1 on the 
  at a small size. The idea is to break up redundant rows into templates and "ID files".
 
  For example:
- ---------------------------------
+ -===========================-
  ID File Contains:
  ID
  1
@@ -29,7 +29,7 @@ Random Level Generator and Level Script Compiler for Super Mario Bros. 1 on the 
  2,Sue,LA
  3,Bob,SF
  3,Sue,LA
- ---------------------------------
+ -===========================-
 
  Keep in mind that the ID file can contain multiple columns if necessary.
 
