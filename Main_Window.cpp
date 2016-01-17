@@ -10,8 +10,9 @@ Main_Window::Main_Window(QWidget *parent) :
     ui(new Ui::Main_Window) {
     this->ui->setupUi(this);
     this->Toggle_Generate_Button();
-    this->mergerThread = new Merger_Thread(false);
+    this->mergerThread = new Merger_Thread();
     this->connect(this->mergerThread, SIGNAL(Merge_Completed(int)), this, SLOT(on_Merge_Completed(int)));
+    this->lastFolder = QDir::homePath();
 }
 
 Main_Window::~Main_Window() {
@@ -70,13 +71,15 @@ void Main_Window::on_btnOutputFileLocation_clicked() {
 }
 
 QString Main_Window::Get_Open_File_Location() {
-    QString fileLocation = QFileDialog::getOpenFileName(this, "Open a CSV File", QApplication::applicationDirPath(), "CSV files (*.csv);;All files (*.*)");
+    QString fileLocation = QFileDialog::getOpenFileName(this, "Open a CSV File", this->lastFolder, "CSV files (*.csv);;All files (*.*)");
     if (fileLocation == NULL || fileLocation.isEmpty()) return QString();
+    QFileInfo file(fileLocation);
+    this->lastFolder = file.path();
     return fileLocation;
 }
 
 QString Main_Window::Get_Save_File_Location() {
-    QString saveLocation = QFileDialog::getSaveFileName(this, "Save Location", QApplication::applicationDirPath(), "CSV files (*.csv);;All files (*.*)");
+    QString saveLocation = QFileDialog::getSaveFileName(this, "Save Location", this->lastFolder, "CSV files (*.csv);;All files (*.*)");
     if (saveLocation == NULL || saveLocation.isEmpty()) return QString();
     QFileInfo file(saveLocation);
     QDir dir = file.dir();
@@ -90,6 +93,8 @@ QString Main_Window::Get_Save_File_Location() {
                               file.fileName() + " does not exist!", "OK");
         return QString();
     }
+
+    this->lastFolder = file.path();
     return saveLocation;
 }
 

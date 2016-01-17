@@ -11,7 +11,10 @@ namespace Error_Codes {
         UNABLE_TO_OPEN_TEMPLATE_FILE = 3,
         UNABLE_TO_READ_TEMPLATE_FILE = 4,
         UNABLE_TO_WRITE_OUTPUT_FILE = 5,
-        UNABLE_TO_CREATE_OUTPUT_FILE = 6
+        UNABLE_TO_CREATE_OUTPUT_FILE = 6,
+        ID_FILE_SAME = 7,
+        TEMPLATE_FILE_SAME = 8,
+        OUTPUT_FILE_SAME = 9
     };
 
     const inline QString Get_Error_Message(int errorCode) {
@@ -23,6 +26,9 @@ namespace Error_Codes {
         case Error_Codes::UNABLE_TO_READ_TEMPLATE_FILE:      return "Unable to read the template file! Try closing any programs that might be using it.";
         case Error_Codes::UNABLE_TO_WRITE_OUTPUT_FILE:       return "Unable to write the output file!";
         case Error_Codes::UNABLE_TO_CREATE_OUTPUT_FILE:      return "Unable to create the output file!";
+        case Error_Codes::ID_FILE_SAME:                      return "The ID file should not be the same as the template or output files";
+        case Error_Codes::TEMPLATE_FILE_SAME:                return "The template file should not be the same as the ID or output files";
+        case Error_Codes::OUTPUT_FILE_SAME:                  return "Don't overwrite the ID or template files!";
         default:                                             return "An unknown error has occurred!";
         }
     }

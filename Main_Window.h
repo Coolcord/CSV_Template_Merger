@@ -37,6 +37,7 @@ private:
 
     Ui::Main_Window *ui;
     Merger_Thread *mergerThread;
+    QString lastFolder;
 };
 
 #endif // MAIN_WINDOW_H

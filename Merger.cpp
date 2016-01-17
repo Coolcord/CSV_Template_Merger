@@ -1,29 +1,31 @@
 #include "Merger.h"
 #include "CSV_Helper.h"
 #include "Error_Codes.h"
-#include <iostream>
 #include <QByteArray>
+#include <QFileInfo>
 #include <QMap>
 #include <QMessageBox>
 #include <assert.h>
 
-Merger::Merger(bool cli) {
+Merger::Merger() {
     this->idFileLocation = QString();
     this->templateFileLocation = QString();
     this->outputFileLocation = QString();
-    this->cli = cli;
     this->csvHelper = new CSV_Helper();
 }
 
-Merger::Merger(const QString &idFileLocation, const QString &templateFileLocation, const QString &outputFileLocation, bool cli) {
+Merger::Merger(const QString &idFileLocation, const QString &templateFileLocation, const QString &outputFileLocation) {
     this->idFileLocation = idFileLocation;
     this->templateFileLocation = templateFileLocation;
     this->outputFileLocation = outputFileLocation;
-    this->cli = cli;
     this->csvHelper = new CSV_Helper();
 }
 
 int Merger::Merge() {
+    //Check to see if all files are unique
+    int duplicateCheckErrorCode = this->Check_For_Duplicate_Files();
+    if (duplicateCheckErrorCode != Error_Codes::SUCCESS) return duplicateCheckErrorCode;
+
     //Open the ID file for reading
     QFile sourceFile(this->idFileLocation);
     if (!sourceFile.exists()) { //ID file does not exist
@@ -168,4 +170,19 @@ QString Merger::Merge_Line(QVector<int> &sourceIndexesInTemplate, QVector<QStrin
     }
 
     return mergedLine;
+}
+
+int Merger::Check_For_Duplicate_Files() {
+    QFileInfo idFileInfo(this->idFileLocation);
+    QFileInfo templateFileInfo(this->templateFileLocation);
+    QFileInfo outputFileInfo(this->outputFileLocation);
+
+    if (idFileInfo.filePath() == templateFileInfo.filePath()
+            || idFileInfo.filePath() == outputFileInfo.filePath()) {
+        return Error_Codes::ID_FILE_SAME;
+    } else if (templateFileInfo.filePath() == outputFileInfo.filePath()) {
+        return Error_Codes::TEMPLATE_FILE_SAME;
+    }
+
+    return Error_Codes::SUCCESS;
 }

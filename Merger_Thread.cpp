@@ -1,12 +1,12 @@
 #include "Merger_Thread.h"
 #include "Merger.h"
 
-Merger_Thread::Merger_Thread(bool cli) {
-    this->merger = new Merger(cli);
+Merger_Thread::Merger_Thread() {
+    this->merger = new Merger();
 }
 
-Merger_Thread::Merger_Thread(const QString &idFileLocation, const QString &templateFileLocation, const QString &outputFileLocation, bool cli) {
-    this->merger = new Merger(idFileLocation, templateFileLocation, outputFileLocation, cli);
+Merger_Thread::Merger_Thread(const QString &idFileLocation, const QString &templateFileLocation, const QString &outputFileLocation) {
+    this->merger = new Merger(idFileLocation, templateFileLocation, outputFileLocation);
 }
 
 Merger_Thread::~Merger_Thread() {
