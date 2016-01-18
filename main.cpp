@@ -13,7 +13,13 @@ int main(int argc, char *argv[]) {
         Main_Window w;
         w.show();
         return a.exec();
-    } else if (argc == 4) { //CLI mode
+    } else if (argc == 4 || argc == 5) { //CLI mode
+        bool noMessages = false;
+        if (argc == 5) {
+            QString noMessagesString = QString(argv[4]).toLower();
+            if (noMessagesString == "--nomessages" || noMessagesString == "-nomessages") noMessages = true;
+        }
+
         QString outputPath = QString(argv[3]);
         QFileInfo outputLocation(outputPath);
         Merger merger(argv[1], argv[2], argv[3], (outputLocation.exists() && outputLocation.isDir()));
@@ -23,12 +29,14 @@ int main(int argc, char *argv[]) {
         int errorCode = merger.Merge();
 
         #ifdef Q_OS_WIN32
-        if (errorCode == Error_Codes::SUCCESS) {
-            QMessageBox::information(a.activeWindow(), "CSV Template Merger",
-                                     Error_Codes::Get_Error_Message(errorCode).toUtf8().data(), "OK");
-        } else {
-            QMessageBox::critical(a.activeWindow(), "CSV Template Merger",
-                                     Error_Codes::Get_Error_Message(errorCode).toUtf8().data(), "OK");
+        if (!noMessages) {
+            if (errorCode == Error_Codes::SUCCESS) {
+                QMessageBox::information(a.activeWindow(), "CSV Template Merger",
+                                         Error_Codes::Get_Error_Message(errorCode).toUtf8().data(), "OK");
+            } else {
+                QMessageBox::critical(a.activeWindow(), "CSV Template Merger",
+                                         Error_Codes::Get_Error_Message(errorCode).toUtf8().data(), "OK");
+            }
         }
         #else
         if (errorCode == Error_Codes::SUCCESS) {
@@ -43,11 +51,9 @@ int main(int argc, char *argv[]) {
     //Improper number of command line arguments
     #ifdef Q_OS_WIN32
     QMessageBox::information(a.activeWindow(), "CSV Template Merger",
-                             QString(argv[0]) + " <ID_file> <template_file> <output_file>\n" +
-                             QString(argv[0]) + " <ID_file> <template_file> <output_folder>", "OK");
+                             QString(argv[0]) + " <ID_file> <template_file> <output_location> [--nomessages]", "OK");
     #else
-    qDebug() << argv[0] << " <ID_file> <template_file> <output_file>";
-    qDebug() << argv[0] << " <ID_file> <template_file> <output_folder>";
+    qDebug() << argv[0] << " <ID_file> <template_file> <output_location> [--nomessages]";
     #endif
     return 0;
 }
