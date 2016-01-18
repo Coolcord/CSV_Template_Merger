@@ -30,7 +30,7 @@ int main(int argc, char *argv[]) {
 
         #ifdef Q_OS_WIN32
         if (!noMessages) {
-            if (errorCode == Error_Codes::SUCCESS) {
+            if (errorCode == Error_Codes::SUCCESS || errorCode == Error_Codes::MULTIFILE_SUCCESS) {
                 QMessageBox::information(a.activeWindow(), "CSV Template Merger",
                                          Error_Codes::Get_Error_Message(errorCode).toUtf8().data(), "OK");
             } else {
@@ -39,12 +39,14 @@ int main(int argc, char *argv[]) {
             }
         }
         #else
-        if (errorCode == Error_Codes::SUCCESS) {
+        if (errorCode == Error_Codes::SUCCESS || errorCode == Error_Codes::MULTIFILE_SUCCESS) {
             qDebug() << Error_Codes::Get_Error_Message(errorCode).toUtf8().data();
         } else {
             qCritical() << Error_Codes::Get_Error_Message(errorCode).toUtf8().data();
         }
         #endif
+
+        if (errorCode == Error_Codes::MULTIFILE_SUCCESS) errorCode = Error_Codes::SUCCESS;
         return errorCode;
     }
 

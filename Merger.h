@@ -21,6 +21,9 @@ public:
 private:
     QString Merge_Line(QVector<int> &sourceIndexesInTemplate, QVector<QString> &sourceHeaders, const QString sourceLine, const QString &templateLine, bool firstLine);
     int Check_For_Duplicate_Files();
+    int Merge_To_Single_File();
+    int Merge_To_Multiple_Files();
+    QString Convert_To_Proper_Number_String(int number, int rows);
 
     QString idFileLocation;
     QString templateFileLocation;

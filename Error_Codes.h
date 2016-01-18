@@ -14,12 +14,15 @@ namespace Error_Codes {
         UNABLE_TO_CREATE_OUTPUT_FILE = 6,
         ID_FILE_SAME = 7,
         TEMPLATE_FILE_SAME = 8,
-        OUTPUT_FILE_SAME = 9
+        OUTPUT_FILE_SAME = 9,
+        UNABLE_TO_CREATE_OUTPUT_FOLDER = 10,
+        UNABLE_TO_READ_OUTPUT_FOLDER = 11,
+        MULTIFILE_SUCCESS = 12
     };
 
     const inline QString Get_Error_Message(int errorCode) {
         switch (errorCode) {
-        case Error_Codes::SUCCESS:                           return "The new merged file was created successfully!";
+        case Error_Codes::SUCCESS:                           return "The new merged file was generated successfully!";
         case Error_Codes::UNABLE_TO_OPEN_ID_FILE:            return "Unable to open the ID file! Try closing any programs that might be using it.";
         case Error_Codes::UNABLE_TO_READ_ID_FILE:            return "Unable to read the ID file! Try closing any programs that might be using it.";
         case Error_Codes::UNABLE_TO_OPEN_TEMPLATE_FILE:      return "Unable to open the template file! Try closing any programs that might be using it.";
@@ -29,6 +32,9 @@ namespace Error_Codes {
         case Error_Codes::ID_FILE_SAME:                      return "The ID file should not be the same as the template or output files";
         case Error_Codes::TEMPLATE_FILE_SAME:                return "The template file should not be the same as the ID or output files";
         case Error_Codes::OUTPUT_FILE_SAME:                  return "Don't overwrite the ID or template files!";
+        case Error_Codes::UNABLE_TO_CREATE_OUTPUT_FOLDER:    return "Unable to create the output folder!";
+        case Error_Codes::UNABLE_TO_READ_OUTPUT_FOLDER:      return "Unable to read the output folder!";
+        case Error_Codes::MULTIFILE_SUCCESS:                 return "The new merged files were generated successfully!";
         default:                                             return "An unknown error has occurred!";
         }
     }

@@ -164,7 +164,7 @@ void Main_Window::on_leOutputFileLocation_textChanged() {
 }
 
 void Main_Window::on_Merge_Completed(int errorCode) {
-    if (errorCode == Error_Codes::SUCCESS) {
+    if (errorCode == Error_Codes::SUCCESS || errorCode == Error_Codes::MULTIFILE_SUCCESS) {
         QMessageBox::information(this, "CSV Template Merger",
                                  Error_Codes::Get_Error_Message(errorCode), "OK");
     } else {
