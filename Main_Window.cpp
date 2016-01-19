@@ -91,11 +91,6 @@ QString Main_Window::Get_Save_File_Location() {
                               file.fileName() + " is a directory!", "OK");
         return QString();
     }
-    if (!file.exists()) {
-        QMessageBox::critical(this, "CSV Template Merger",
-                              file.fileName() + " does not exist!", "OK");
-        return QString();
-    }
 
     this->lastFolder = file.path();
     return saveLocation;
