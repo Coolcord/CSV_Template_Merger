@@ -12,6 +12,7 @@ class Merger {
 public:
     Merger();
     Merger(const QString &idFileLocation, const QString &templateFileLocation, const QString &outputFileLocation, bool multiFileMode);
+	~Merger();
     int Merge();
     void Set_ID_File_Location(const QString &idFileLocation);
     void Set_Template_File_Location(const QString &templateFileLocation);

@@ -24,6 +24,11 @@ Merger::Merger(const QString &idFileLocation, const QString &templateFileLocatio
     this->csvHelper = new CSV_Helper();
 }
 
+Merger::~Merger() {
+	delete this->csvHelper;
+	this->csvHelper = NULL;
+}
+
 int Merger::Merge() {
     if (this->multiFileMode) return this->Merge_To_Multiple_Files();
     else return this->Merge_To_Single_File();
