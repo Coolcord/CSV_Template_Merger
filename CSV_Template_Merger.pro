@@ -17,13 +17,16 @@ SOURCES += main.cpp\
         Main_Window.cpp \
     Merger.cpp \
     CSV_Helper.cpp \
-    Merger_Thread.cpp
+    Merger_Thread.cpp \
+    Tag_Manager.cpp
 
 HEADERS  += Main_Window.h \
     Merger.h \
     CSV_Helper.h \
     Merger_Thread.h \
-    Error_Codes.h
+    Error_Codes.h \
+    Tag_Manager.h \
+    Tags.h
 
 FORMS    += Main_Window.ui
 
