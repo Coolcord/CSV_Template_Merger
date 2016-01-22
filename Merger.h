@@ -7,6 +7,7 @@
 #include <QFile>
 
 class CSV_Helper;
+class Tag_Manager;
 
 class Merger {
 public:
@@ -20,7 +21,7 @@ public:
     void Set_Multi_File_Mode(bool multiFileMode);
 
 private:
-    QString Merge_Line(QVector<int> &sourceIndexesInTemplate, QVector<QString> &sourceHeaders, const QString sourceLine, const QString &templateLine, bool firstLine);
+    QString Merge_Line(Tag_Manager &tagManager, QVector<int> &sourceIndexesInTemplate, QVector<QString> &sourceHeaders, const QString sourceLine, const QString &templateLine, bool firstLine);
     int Check_For_Duplicate_Files();
     int Merge_To_Single_File();
     int Merge_To_Multiple_Files();

@@ -1,5 +1,6 @@
 #include "Merger.h"
 #include "CSV_Helper.h"
+#include "Tag_Manager.h"
 #include "Error_Codes.h"
 #include <QByteArray>
 #include <QDir>
@@ -50,7 +51,7 @@ void Merger::Set_Multi_File_Mode(bool multiFileMode) {
     this->multiFileMode = multiFileMode;
 }
 
-QString Merger::Merge_Line(QVector<int> &sourceIndexesInTemplate, QVector<QString> &sourceHeaders, const QString sourceLine, const QString &templateLine, bool firstLine) {
+QString Merger::Merge_Line(Tag_Manager &tagManager, QVector<int> &sourceIndexesInTemplate, QVector<QString> &sourceHeaders, const QString sourceLine, const QString &templateLine, bool firstLine) {
     QString mergedLine = QString();
     QVector<QString> sourceElements = this->csvHelper->Get_CSV_Elements_From_Line_As_Vector(sourceLine);
     QVector<QString> templateElements = this->csvHelper->Get_CSV_Elements_From_Line_As_Vector(templateLine);
@@ -63,28 +64,32 @@ QString Merger::Merge_Line(QVector<int> &sourceIndexesInTemplate, QVector<QStrin
     //Update the template elements
     assert(sourceElements.size() == sourceIndexesInTemplate.size());
     for (int i = sourceElements.size()-1; i >= 0; --i) {
-        //Insert at the beginning
-        if (sourceIndexesInTemplate[i] == -1) {
-            if (firstLine) { //fix the header
-                templateElements.prepend(sourceHeaders[i]);
-                //Fix the indexes before moving on
-                for (int j = 0; j < sourceIndexesInTemplate.size(); ++j) {
-                    if (sourceIndexesInTemplate[j] == -1) continue;
-                    else ++sourceIndexesInTemplate[j];
+        if (!firstLine && tagManager.Is_Header_Element_Tagged(sourceHeaders[i])) {
+            templateElements[sourceIndexesInTemplate[i]] = tagManager.Apply_Tag_To_Element(sourceHeaders[i], sourceElements[i], templateElements[sourceIndexesInTemplate[i]]);
+        } else {
+            //Insert at the beginning
+            if (sourceIndexesInTemplate[i] == -1) {
+                if (firstLine) { //fix the header
+                    templateElements.prepend(sourceHeaders[i]);
+                    //Fix the indexes before moving on
+                    for (int j = 0; j < sourceIndexesInTemplate.size(); ++j) {
+                        if (sourceIndexesInTemplate[j] == -1) continue;
+                        else ++sourceIndexesInTemplate[j];
+                    }
+                } else { //add the element to the beginning of the line
+                    templateElements.prepend(sourceElements[i]);
                 }
-            } else { //add the element to the beginning of the line
-                templateElements.prepend(sourceElements[i]);
-            }
-        } else { //replace the existing element
-            //Add empty columns if necessary
-            while (sourceIndexesInTemplate[i] > templateElements.size()-1) {
-                templateElements.append("");
-            }
-            //Replace the data
-            if (firstLine) {
-                templateElements[sourceIndexesInTemplate[i]] = sourceHeaders[i];
-            } else {
-                templateElements[sourceIndexesInTemplate[i]] = sourceElements[i];
+            } else { //replace the existing element
+                //Add empty columns if necessary
+                while (sourceIndexesInTemplate[i] > templateElements.size()-1) {
+                    templateElements.append("");
+                }
+                //Replace the data
+                if (firstLine) {
+                    templateElements[sourceIndexesInTemplate[i]] = sourceHeaders[i];
+                } else {
+                    templateElements[sourceIndexesInTemplate[i]] = sourceElements[i];
+                }
             }
         }
     }
@@ -184,9 +189,11 @@ int Merger::Merge_To_Single_File() {
         sourceIndexesInTemplate.append(index);
     }
     assert(sourceHeaders.size() == sourceIndexesInTemplate.size());
+    Tag_Manager tagManager(this->csvHelper, &sourceIndexesInTemplate);
+    tagManager.Read_Header_And_Get_Untagged_Elements(sourceHeaders);
 
     //Generate the header
-    if (outputFile.write(QByteArray(this->Merge_Line(sourceIndexesInTemplate, sourceHeaders, sourceHeaderLine, templateHeaderLine, true).toUtf8().data())) == -1
+    if (outputFile.write(QByteArray(this->Merge_Line(tagManager, sourceIndexesInTemplate, sourceHeaders, sourceHeaderLine, templateHeaderLine, true).toUtf8().data())) == -1
             || outputFile.write(QByteArray(NEW_LINE.toUtf8().data())) == -1) {
         sourceFile.close();
         templateFile.close();
@@ -200,7 +207,7 @@ int Merger::Merge_To_Single_File() {
         templateFile.reset(); //start at the beginning of the template file
         templateFile.readLine();
         for (QString templateLine = templateFile.readLine(); !templateFile.atEnd(); templateLine = templateFile.readLine()) {
-            if (outputFile.write(QByteArray(this->Merge_Line(sourceIndexesInTemplate, sourceHeaders, sourceLine, templateLine, false).toUtf8().data())) == -1
+            if (outputFile.write(QByteArray(this->Merge_Line(tagManager, sourceIndexesInTemplate, sourceHeaders, sourceLine, templateLine, false).toUtf8().data())) == -1
                     || outputFile.write(QByteArray(NEW_LINE.toUtf8().data())) == -1) {
                 sourceFile.close();
                 templateFile.close();
@@ -291,6 +298,8 @@ int Merger::Merge_To_Multiple_Files() {
         sourceIndexesInTemplate.append(index);
     }
     assert(sourceHeaders.size() == sourceIndexesInTemplate.size());
+    Tag_Manager tagManager(this->csvHelper, &sourceIndexesInTemplate);
+    tagManager.Read_Header_And_Get_Untagged_Elements(sourceHeaders);
 
     //Count the number of rows in the ID (source) file
     int rowCount = 0;
@@ -323,7 +332,7 @@ int Merger::Merge_To_Multiple_Files() {
         //Perform the merge based upon the current ID line
         templateFile.reset(); //start at the beginning of the template file
         for (QString templateLine = templateFile.readLine(); !templateFile.atEnd(); templateLine = templateFile.readLine()) {
-            if (outputFile.write(QByteArray(this->Merge_Line(sourceIndexesInTemplate, sourceHeaders, sourceLine, templateLine, firstLine).toUtf8().data())) == -1
+            if (outputFile.write(QByteArray(this->Merge_Line(tagManager, sourceIndexesInTemplate, sourceHeaders, sourceLine, templateLine, firstLine).toUtf8().data())) == -1
                     || outputFile.write(QByteArray(NEW_LINE.toUtf8().data())) == -1) {
                 sourceFile.close();
                 templateFile.close();

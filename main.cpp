@@ -6,9 +6,12 @@
 #include <QMessageBox>
 #include <QDebug>
 #include <QString>
+#include <QTime>
 
 int main(int argc, char *argv[]) {
     QApplication a(argc, argv);
+    qsrand((uint)QTime::currentTime().msec());
+
     if (argc == 1) { //GUI mode
         Main_Window w;
         w.show();

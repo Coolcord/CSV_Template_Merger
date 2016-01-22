@@ -14,12 +14,14 @@ public:
     Tag_Manager(CSV_Helper *csvHelper, QVector<int> *sourceIndexesInTemplate);
     ~Tag_Manager();
     QVector<QString> Read_Header_And_Get_Untagged_Elements(const QVector<QString> &idHeaderElements);
-    QString Apply_Tags_To_Line(QVector<QString> &line);
+    QString Apply_Tag_To_Element(const QString &sourceHeader, const QString &idElement, const QString &element);
+    bool Is_Header_Element_Tagged(const QString &element);
 
 private:
-    QString Randomize(const QString &range);
-    QString Randomize_By_Percentage_Range(const QString &range);
+    QString Randomize(const QString &rangeInIDFile, const QString &originalNumber);
+    QString Randomize_By_Percentage_Range(const QString &rangeInIDFile, const QString &baseNumber);
     Tags::Tag Read_Tag(const QString &element);
+    QString Trim_Tags(const QString &element);
 
     CSV_Helper *csvHelper;
     QMap<QString, Tags::Tag> *taggedHeaders;
