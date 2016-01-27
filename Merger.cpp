@@ -65,6 +65,7 @@ QString Merger::Merge_Line(Tag_Manager &tagManager, QVector<int> &sourceIndexesI
     assert(sourceElements.size() == sourceIndexesInTemplate.size());
     for (int i = sourceElements.size()-1; i >= 0; --i) {
         if (!firstLine && tagManager.Is_Header_Element_Tagged(sourceHeaders[i])) {
+            //TODO: Handle insertion!
             templateElements[sourceIndexesInTemplate[i]] = tagManager.Apply_Tag_To_Element(sourceHeaders[i], sourceElements[i], templateElements[sourceIndexesInTemplate[i]]);
         } else {
             //Insert at the beginning
@@ -176,7 +177,7 @@ int Merger::Merge_To_Single_File() {
     QMap<int, int> sourceIndexesInTemplateHash;
     for (int i = 0; i < sourceHeaders.size(); ++i) {
         int index = -1;
-        QMap<QString, int>::iterator element = templateHeadersHash.find(sourceHeaders[i].toLower());
+        QMap<QString, int>::iterator element = templateHeadersHash.find(this->Strip_Tags(sourceHeaders[i].toLower()));
         if (element != templateHeadersHash.end()) index = element.value();
         //Handle duplicates
         if (index != -1) {
@@ -285,7 +286,7 @@ int Merger::Merge_To_Multiple_Files() {
     QMap<int, int> sourceIndexesInTemplateHash;
     for (int i = 0; i < sourceHeaders.size(); ++i) {
         int index = -1;
-        QMap<QString, int>::iterator element = templateHeadersHash.find(sourceHeaders[i].toLower());
+        QMap<QString, int>::iterator element = templateHeadersHash.find(this->Strip_Tags(sourceHeaders[i].toLower()));
         if (element != templateHeadersHash.end()) index = element.value();
         //Handle duplicates
         if (index != -1) {
@@ -349,6 +350,27 @@ int Merger::Merge_To_Multiple_Files() {
     sourceFile.close();
     templateFile.close();
     return Error_Codes::MULTIFILE_SUCCESS;
+}
+
+QString Merger::Strip_Tags(const QString &headerElement) {
+    bool inTag = false;
+    QString strippedElement = "";
+
+    //Scan for tags
+    for (int i = 0; i < headerElement.size(); ++i) {
+        switch (headerElement.at(i).toLatin1()) {
+        default:
+            if (!inTag) strippedElement += headerElement.at(i);
+            break;
+        case '[':
+            inTag = true;
+            break;
+        case ']':
+            inTag = false;
+            break;
+        }
+    }
+    return strippedElement;
 }
 
 QString Merger::Convert_To_Proper_Number_String(int number, int rows) {

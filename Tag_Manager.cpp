@@ -31,15 +31,15 @@ QVector<QString> Tag_Manager::Read_Header_And_Get_Untagged_Elements(const QVecto
     for (int i = 0; i < idHeaderElements.size(); ++i) {
         Tags::Tag tag = this->Read_Tag(idHeaderElements.at(i));
         if (tag == Tags::NONE) untaggedElements.append(idHeaderElements.at(i));
-        else this->taggedHeaders->insert(this->Trim_Tags(idHeaderElements.at(i)), tag);
+        else this->taggedHeaders->insert(this->Strip_Tags(idHeaderElements.at(i)), tag);
     }
     return untaggedElements;
 }
 
 QString Tag_Manager::Apply_Tag_To_Element(const QString &sourceHeader, const QString &idElement, const QString &templateElement) {
-    assert(this->Is_Header_Element_Tagged(templateElement));
-    QMap<QString, Tags::Tag>::iterator tagIter = this->supportedTags->find(this->Trim_Tags(sourceHeader.toLower()));
-    assert(tagIter != this->supportedTags->end());
+    assert(this->Is_Header_Element_Tagged(sourceHeader));
+    QMap<QString, Tags::Tag>::iterator tagIter = this->taggedHeaders->find(this->Strip_Tags(sourceHeader.toLower()));
+    assert(tagIter != this->taggedHeaders->end());
     switch (tagIter.value()) {
     default:
     case Tags::NONE:                            assert(false);
@@ -50,7 +50,7 @@ QString Tag_Manager::Apply_Tag_To_Element(const QString &sourceHeader, const QSt
 }
 
 bool Tag_Manager::Is_Header_Element_Tagged(const QString &element) {
-    return this->taggedHeaders->contains(this->Trim_Tags(element.toLower()));
+    return this->taggedHeaders->contains(this->Strip_Tags(element.toLower()));
 }
 
 QString Tag_Manager::Randomize(const QString &rangeInIDFile, const QString &originalNumber) {
@@ -60,6 +60,7 @@ QString Tag_Manager::Randomize(const QString &rangeInIDFile, const QString &orig
     //Determine the min/max values
     double min = 0.0;
     double max = 0.0;
+    int decimalPlaces = 2;
     if (range.isEmpty()) {
         max = 1000.00; //default value
     } else {
@@ -73,9 +74,7 @@ QString Tag_Manager::Randomize(const QString &rangeInIDFile, const QString &orig
         max = ranges[1].toDouble(&valid);
         if (!valid) return QString();
     }
-
-    //TODO: There's a bug here. The decimal will currently ignore the min/max values
-    return QString::number(min+(qrand()%(static_cast<int>(max-min+1))) + static_cast<double>((qrand()%100))/100.00);
+    return QString::number(this->Generate_Random_Double(min, max, this->Get_Number_Of_Decimal_Places_From_Number_Range(range)));
 }
 
 QString Tag_Manager::Randomize_By_Percentage_Range(const QString &rangeInIDFile, const QString &baseNumber) {
@@ -91,11 +90,11 @@ QString Tag_Manager::Randomize_By_Percentage_Range(const QString &rangeInIDFile,
         min = 0.25;
         max = 200.00;
     } else {
+        range = range.replace("%", "");
         QStringList ranges = range.split('-');
         if (ranges.size() != 2) return QString();
 
         //Parse out the numbers
-        range = range.replace("%", "");
         min = ranges[0].toDouble(&valid);
         if (!valid) return QString();
         max = ranges[1].toDouble(&valid);
@@ -109,9 +108,31 @@ QString Tag_Manager::Randomize_By_Percentage_Range(const QString &rangeInIDFile,
     //Update the min and max numbers based upon the range
     min = baseNum*(min/100.00);
     max = baseNum*(max/100.00);
+    return QString::number(this->Generate_Random_Double(min, max, this->Get_Number_Of_Decimal_Places_From_Number_Range(range)));
+}
 
-    //TODO: There's a bug here. The decimal will currently ignore the min/max values
-    return QString::number(min+(qrand()%(static_cast<int>(max-min+1))) + static_cast<double>((qrand()%100))/100.00);
+int Tag_Manager::Get_Number_Of_Decimal_Places_From_Number_Range(const QString &range) {
+    QStringList ranges = range.split('-');
+    if (ranges.size() == 1) return 0;
+
+    //Parse each number string
+    int decimalPlaces = 0;
+    QStringList decimal = ranges.at(0).split("\\.");
+    if (decimal.size() != 1) {
+        decimalPlaces = decimal.at(1).size();
+    }
+    decimal = ranges.at(1).split("\\.");
+    if (decimal.size() != 1) {
+        if (decimal.at(1).size() > decimalPlaces) {
+            decimalPlaces = decimal.at(1).size();
+        }
+    }
+    return decimalPlaces;
+}
+
+double Tag_Manager::Generate_Random_Double(double min, double max, int decimalPlaces) {
+    double value = 0.0;
+    //TODO: Finish this!!!
 }
 
 Tags::Tag Tag_Manager::Read_Tag(const QString &element) {
@@ -122,7 +143,7 @@ Tags::Tag Tag_Manager::Read_Tag(const QString &element) {
     for (int i = 0; i < element.size(); ++i) {
         switch (element.at(i).toLatin1()) {
         default:
-            tag += element.at(i);
+            if (inTag) tag += element.at(i);
             break;
         case '[':
             inTag = true;
@@ -140,17 +161,24 @@ Tags::Tag Tag_Manager::Read_Tag(const QString &element) {
     return Tags::NONE;
 }
 
-QString Tag_Manager::Trim_Tags(const QString &element) {
+QString Tag_Manager::Strip_Tags(const QString &headerElement) {
     bool inTag = false;
-    QString trimmed = "";
-    for (int i = 0; i < element.size(); ++i) {
-        if (inTag) {
-            if (element.at(i) == ']') inTag = false;
-        } else {
-            if (element.at(i) == '[') inTag = true;
-            else trimmed += element.at(i);
+    QString strippedElement = "";
+
+    //Scan for tags
+    for (int i = 0; i < headerElement.size(); ++i) {
+        switch (headerElement.at(i).toLatin1()) {
+        default:
+            if (!inTag) strippedElement += headerElement.at(i);
+            break;
+        case '[':
+            inTag = true;
+            break;
+        case ']':
+            inTag = false;
+            break;
         }
     }
-    return trimmed;
+    return strippedElement;
 }
 

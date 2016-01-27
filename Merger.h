@@ -25,6 +25,7 @@ private:
     int Check_For_Duplicate_Files();
     int Merge_To_Single_File();
     int Merge_To_Multiple_Files();
+    QString Strip_Tags(const QString &headerElement);
     QString Convert_To_Proper_Number_String(int number, int rows);
 
     QString idFileLocation;
