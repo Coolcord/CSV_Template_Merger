@@ -122,7 +122,7 @@ QString Tag_Manager::Randomize_By_Percentage_Range(const QString &rangeInIDFile,
     if (!valid) return QString();
 
     //Get the number of decimal places to use from the base number
-    int decimalPlaces = 2;
+    int decimalPlaces = 0;
     QStringList baseNumberSplit = baseNumber.split(".");
     if (baseNumberSplit.size() > 1) {
         decimalPlaces = baseNumberSplit.at(1).size();
@@ -166,7 +166,8 @@ QString Tag_Manager::Generate_Random_Double(double min, double max, int decimalP
     }
 
     //Trim down to the remaining decimal places
-    valueString = valueStringSplit.at(0) + ".";
+    valueString = valueStringSplit.at(0);
+    if (decimalPlaces > 0) valueString += ".";
     for (int i = 0; i < decimalPlaces; ++i) {
         valueString += valueDecimal.at(i);
     }
