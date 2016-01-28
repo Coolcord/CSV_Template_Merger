@@ -21,7 +21,7 @@ private:
     QString Randomize(const QString &rangeInIDFile, const QString &originalNumber);
     QString Randomize_By_Percentage_Range(const QString &rangeInIDFile, const QString &baseNumber);
     int Get_Number_Of_Decimal_Places_From_Number_Range(const QString &range);
-    double Generate_Random_Double(double min, double max, int decimalPlaces);
+    QString Generate_Random_Double(double min, double max, int decimalPlaces);
     Tags::Tag Read_Tag(const QString &element);
     QString Strip_Tags(const QString &headerElement);
 

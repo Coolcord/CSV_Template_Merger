@@ -73,8 +73,10 @@ QString Tag_Manager::Randomize(const QString &rangeInIDFile, const QString &orig
         if (!valid) return QString();
         max = ranges[1].toDouble(&valid);
         if (!valid) return QString();
+
+        decimalPlaces = this->Get_Number_Of_Decimal_Places_From_Number_Range(range);
     }
-    return QString::number(this->Generate_Random_Double(min, max, this->Get_Number_Of_Decimal_Places_From_Number_Range(range)));
+    return this->Generate_Random_Double(min, max, decimalPlaces);
 }
 
 QString Tag_Manager::Randomize_By_Percentage_Range(const QString &rangeInIDFile, const QString &baseNumber) {
@@ -105,10 +107,17 @@ QString Tag_Manager::Randomize_By_Percentage_Range(const QString &rangeInIDFile,
     double baseNum = baseNumber.toDouble(&valid);
     if (!valid) return QString();
 
+    //Get the number of decimal places to use from the base number
+    int decimalPlaces = 2;
+    QStringList baseNumberSplit = baseNumber.split(".");
+    if (baseNumberSplit.size() > 1) {
+        decimalPlaces = baseNumberSplit.at(1).size();
+    }
+
     //Update the min and max numbers based upon the range
     min = baseNum*(min/100.00);
     max = baseNum*(max/100.00);
-    return QString::number(this->Generate_Random_Double(min, max, this->Get_Number_Of_Decimal_Places_From_Number_Range(range)));
+    return this->Generate_Random_Double(min, max, decimalPlaces);
 }
 
 int Tag_Manager::Get_Number_Of_Decimal_Places_From_Number_Range(const QString &range) {
@@ -117,11 +126,11 @@ int Tag_Manager::Get_Number_Of_Decimal_Places_From_Number_Range(const QString &r
 
     //Parse each number string
     int decimalPlaces = 0;
-    QStringList decimal = ranges.at(0).split("\\.");
+    QStringList decimal = ranges.at(0).split(".");
     if (decimal.size() != 1) {
         decimalPlaces = decimal.at(1).size();
     }
-    decimal = ranges.at(1).split("\\.");
+    decimal = ranges.at(1).split(".");
     if (decimal.size() != 1) {
         if (decimal.at(1).size() > decimalPlaces) {
             decimalPlaces = decimal.at(1).size();
@@ -130,9 +139,25 @@ int Tag_Manager::Get_Number_Of_Decimal_Places_From_Number_Range(const QString &r
     return decimalPlaces;
 }
 
-double Tag_Manager::Generate_Random_Double(double min, double max, int decimalPlaces) {
-    double value = 0.0;
-    //TODO: Finish this!!!
+QString Tag_Manager::Generate_Random_Double(double min, double max, int decimalPlaces) {
+    double value = (((double)rand() * (max-min)) / (double)RAND_MAX+min);
+    QString valueString = QString::number(value);
+    QStringList valueStringSplit = valueString.split(".");
+    QString valueDecimal = "";
+    if (valueStringSplit.size() > 1) valueDecimal = valueStringSplit.at(1);
+
+    //Add padding if necessary
+    while (valueDecimal.size() < decimalPlaces) {
+        valueDecimal += "0";
+    }
+
+    //Trim down to the remaining decimal places
+    valueString = valueStringSplit.at(0) + ".";
+    for (int i = 0; i < decimalPlaces; ++i) {
+        valueString += valueDecimal.at(i);
+    }
+
+    return valueString;
 }
 
 Tags::Tag Tag_Manager::Read_Tag(const QString &element) {

@@ -352,6 +352,7 @@ int Merger::Merge_To_Multiple_Files() {
     return Error_Codes::MULTIFILE_SUCCESS;
 }
 
+//TODO: Remove this duplicate function
 QString Merger::Strip_Tags(const QString &headerElement) {
     bool inTag = false;
     QString strippedElement = "";
