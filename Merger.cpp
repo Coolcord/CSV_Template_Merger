@@ -67,6 +67,7 @@ QString Merger::Merge_Line(Tag_Manager &tagManager, QVector<int> &sourceIndexesI
         if (tagManager.Is_Header_Element_Tagged(sourceHeaders[i])) {
             if (firstLine) continue;
             assert(sourceIndexesInTemplate[i] >= 0);
+            //TODO: Find a way to report errors from here
             templateElements[sourceIndexesInTemplate[i]] = tagManager.Apply_Tag_To_Element(sourceHeaders[i], sourceElements[i], templateElements[sourceIndexesInTemplate[i]]);
         } else {
             //Insert at the beginning
