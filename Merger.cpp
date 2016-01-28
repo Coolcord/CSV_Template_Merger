@@ -26,8 +26,8 @@ Merger::Merger(const QString &idFileLocation, const QString &templateFileLocatio
 }
 
 Merger::~Merger() {
-	delete this->csvHelper;
-	this->csvHelper = NULL;
+    delete this->csvHelper;
+    this->csvHelper = NULL;
 }
 
 int Merger::Merge() {
@@ -173,11 +173,12 @@ int Merger::Merge_To_Single_File() {
     //Read the source headers and determine their index in the template file
     QString sourceHeaderLine = sourceFile.readLine();
     QVector<QString> sourceHeaders = this->csvHelper->Get_CSV_Elements_From_Line_As_Vector(sourceHeaderLine.toLower());
+    Tag_Manager tagManager(this->csvHelper);
     QVector<int> sourceIndexesInTemplate;
     QMap<int, int> sourceIndexesInTemplateHash;
     for (int i = 0; i < sourceHeaders.size(); ++i) {
         int index = -1;
-        QMap<QString, int>::iterator element = templateHeadersHash.find(this->Strip_Tags(sourceHeaders[i].toLower()));
+        QMap<QString, int>::iterator element = templateHeadersHash.find(tagManager.Strip_Tags(sourceHeaders[i].toLower()));
         if (element != templateHeadersHash.end()) index = element.value();
         //Handle duplicates
         if (index != -1) {
@@ -190,7 +191,7 @@ int Merger::Merge_To_Single_File() {
         sourceIndexesInTemplate.append(index);
     }
     assert(sourceHeaders.size() == sourceIndexesInTemplate.size());
-    Tag_Manager tagManager(this->csvHelper, &sourceIndexesInTemplate);
+    tagManager.Set_Source_Indexes_In_Template(&sourceIndexesInTemplate);
     tagManager.Read_Header_And_Get_Untagged_Elements(sourceHeaders);
 
     //Generate the header
@@ -282,11 +283,12 @@ int Merger::Merge_To_Multiple_Files() {
     //Read the source headers and determine their index in the template file
     QString sourceHeaderLine = sourceFile.readLine();
     QVector<QString> sourceHeaders = this->csvHelper->Get_CSV_Elements_From_Line_As_Vector(sourceHeaderLine.toLower());
+    Tag_Manager tagManager(this->csvHelper);
     QVector<int> sourceIndexesInTemplate;
     QMap<int, int> sourceIndexesInTemplateHash;
     for (int i = 0; i < sourceHeaders.size(); ++i) {
         int index = -1;
-        QMap<QString, int>::iterator element = templateHeadersHash.find(this->Strip_Tags(sourceHeaders[i].toLower()));
+        QMap<QString, int>::iterator element = templateHeadersHash.find(tagManager.Strip_Tags(sourceHeaders[i].toLower()));
         if (element != templateHeadersHash.end()) index = element.value();
         //Handle duplicates
         if (index != -1) {
@@ -299,7 +301,7 @@ int Merger::Merge_To_Multiple_Files() {
         sourceIndexesInTemplate.append(index);
     }
     assert(sourceHeaders.size() == sourceIndexesInTemplate.size());
-    Tag_Manager tagManager(this->csvHelper, &sourceIndexesInTemplate);
+    tagManager.Set_Source_Indexes_In_Template(&sourceIndexesInTemplate);
     tagManager.Read_Header_And_Get_Untagged_Elements(sourceHeaders);
 
     //Count the number of rows in the ID (source) file
@@ -350,28 +352,6 @@ int Merger::Merge_To_Multiple_Files() {
     sourceFile.close();
     templateFile.close();
     return Error_Codes::MULTIFILE_SUCCESS;
-}
-
-//TODO: Remove this duplicate function
-QString Merger::Strip_Tags(const QString &headerElement) {
-    bool inTag = false;
-    QString strippedElement = "";
-
-    //Scan for tags
-    for (int i = 0; i < headerElement.size(); ++i) {
-        switch (headerElement.at(i).toLatin1()) {
-        default:
-            if (!inTag) strippedElement += headerElement.at(i);
-            break;
-        case '[':
-            inTag = true;
-            break;
-        case ']':
-            inTag = false;
-            break;
-        }
-    }
-    return strippedElement;
 }
 
 QString Merger::Convert_To_Proper_Number_String(int number, int rows) {

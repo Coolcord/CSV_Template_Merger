@@ -1,9 +1,18 @@
 #include "Tag_Manager.h"
 #include <assert.h>
 
+Tag_Manager::Tag_Manager(CSV_Helper *csvHelper) {
+    assert(csvHelper);
+    this->Initialize(csvHelper, NULL);
+}
+
 Tag_Manager::Tag_Manager(CSV_Helper *csvHelper, QVector<int> *sourceIndexesInTemplate) {
     assert(csvHelper);
     assert(sourceIndexesInTemplate);
+    this->Initialize(csvHelper, sourceIndexesInTemplate);
+}
+
+void Tag_Manager::Initialize(CSV_Helper *csvHelper, QVector<int> *sourceIndexesInTemplate) {
     this->csvHelper = csvHelper;
     this->taggedHeaders = new QMap<QString, Tags::Tag>();
     this->sourceIndexesInTemplate = sourceIndexesInTemplate;
@@ -23,6 +32,11 @@ Tag_Manager::~Tag_Manager() {
     this->taggedHeaders = NULL;
     this->sourceIndexesInTemplate = NULL;
     this->supportedTags = NULL;
+}
+
+void Tag_Manager::Set_Source_Indexes_In_Template(QVector<int> *sourceIndexesInTemplate) {
+    assert(sourceIndexesInTemplate);
+    this->sourceIndexesInTemplate = sourceIndexesInTemplate;
 }
 
 QVector<QString> Tag_Manager::Read_Header_And_Get_Untagged_Elements(const QVector<QString> &idHeaderElements) {
