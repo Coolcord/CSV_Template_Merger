@@ -69,6 +69,7 @@ bool Tag_Manager::Is_Header_Element_Tagged(const QString &element) {
 
 QString Tag_Manager::Randomize(const QString &rangeInIDFile, const QString &originalNumber) {
     QString range(rangeInIDFile);
+    range = range.replace(" ", "");
     if (range.toLower() == "skip") return originalNumber;
 
     //Determine the min/max values
@@ -95,6 +96,7 @@ QString Tag_Manager::Randomize(const QString &rangeInIDFile, const QString &orig
 
 QString Tag_Manager::Randomize_By_Percentage_Range(const QString &rangeInIDFile, const QString &baseNumber) {
     QString range(rangeInIDFile);
+    range = range.replace(" ", "");
     if (range.toLower() == "skip") return baseNumber;
 
     //Determine the min/max values
