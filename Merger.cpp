@@ -67,8 +67,9 @@ QString Merger::Merge_Line(Tag_Manager &tagManager, QVector<int> &sourceIndexesI
         if (tagManager.Is_Header_Element_Tagged(sourceHeaders[i])) {
             if (firstLine) continue;
             assert(sourceIndexesInTemplate[i] >= 0);
-            //TODO: Find a way to report errors from here
-            templateElements[sourceIndexesInTemplate[i]] = tagManager.Apply_Tag_To_Element(sourceHeaders[i], sourceElements[i], templateElements[sourceIndexesInTemplate[i]]);
+            QString lineWithTagApplied = tagManager.Apply_Tag_To_Element(sourceHeaders[i], sourceElements[i], templateElements[sourceIndexesInTemplate[i]]);
+            if (lineWithTagApplied.isEmpty()) return QString();
+            else templateElements[sourceIndexesInTemplate[i]] = lineWithTagApplied;
         } else {
             //Insert at the beginning
             if (sourceIndexesInTemplate[i] == -1) {
@@ -197,7 +198,15 @@ int Merger::Merge_To_Single_File() {
     tagManager.Read_Header_And_Get_Untagged_Elements(sourceHeaders);
 
     //Generate the header
-    if (outputFile.write(QByteArray(this->Merge_Line(tagManager, sourceIndexesInTemplate, sourceHeaders, sourceHeaderLine, templateHeaderLine, true).toUtf8().data())) == -1
+    QString mergedHeader = this->Merge_Line(tagManager, sourceIndexesInTemplate, sourceHeaders, sourceHeaderLine, templateHeaderLine, true);
+    if (mergedHeader.isEmpty()) {
+        sourceFile.close();
+        templateFile.close();
+        outputFile.close();
+        outputFile.remove();
+        return Error_Codes::SYNTAX_ERROR_IN_ID_FILE;
+    }
+    if (outputFile.write(QByteArray(mergedHeader.toUtf8().data())) == -1
             || outputFile.write(QByteArray(NEW_LINE.toUtf8().data())) == -1) {
         sourceFile.close();
         templateFile.close();
@@ -211,7 +220,15 @@ int Merger::Merge_To_Single_File() {
         templateFile.reset(); //start at the beginning of the template file
         templateFile.readLine();
         for (QString templateLine = templateFile.readLine(); !templateFile.atEnd(); templateLine = templateFile.readLine()) {
-            if (outputFile.write(QByteArray(this->Merge_Line(tagManager, sourceIndexesInTemplate, sourceHeaders, sourceLine, templateLine, false).toUtf8().data())) == -1
+            QString mergedLine = this->Merge_Line(tagManager, sourceIndexesInTemplate, sourceHeaders, sourceLine, templateLine, false);
+            if (mergedLine.isEmpty()) {
+                sourceFile.close();
+                templateFile.close();
+                outputFile.close();
+                outputFile.remove();
+                return Error_Codes::SYNTAX_ERROR_IN_ID_FILE;
+            }
+            if (outputFile.write(QByteArray(mergedLine.toUtf8().data())) == -1
                     || outputFile.write(QByteArray(NEW_LINE.toUtf8().data())) == -1) {
                 sourceFile.close();
                 templateFile.close();
@@ -337,7 +354,15 @@ int Merger::Merge_To_Multiple_Files() {
         //Perform the merge based upon the current ID line
         templateFile.reset(); //start at the beginning of the template file
         for (QString templateLine = templateFile.readLine(); !templateFile.atEnd(); templateLine = templateFile.readLine()) {
-            if (outputFile.write(QByteArray(this->Merge_Line(tagManager, sourceIndexesInTemplate, sourceHeaders, sourceLine, templateLine, firstLine).toUtf8().data())) == -1
+            QString mergedLine = this->Merge_Line(tagManager, sourceIndexesInTemplate, sourceHeaders, sourceLine, templateLine, firstLine);
+            if (mergedLine.isEmpty()) {
+                sourceFile.close();
+                templateFile.close();
+                outputFile.close();
+                outputFile.remove();
+                return Error_Codes::SYNTAX_ERROR_IN_ID_FILE;
+            }
+            if (outputFile.write(QByteArray(mergedLine.toUtf8().data())) == -1
                     || outputFile.write(QByteArray(NEW_LINE.toUtf8().data())) == -1) {
                 sourceFile.close();
                 templateFile.close();

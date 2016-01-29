@@ -17,7 +17,8 @@ namespace Error_Codes {
         OUTPUT_FILE_SAME = 9,
         UNABLE_TO_CREATE_OUTPUT_FOLDER = 10,
         UNABLE_TO_READ_OUTPUT_FOLDER = 11,
-        MULTIFILE_SUCCESS = 12
+        MULTIFILE_SUCCESS = 12,
+        SYNTAX_ERROR_IN_ID_FILE = 13
     };
 
     const inline QString Get_Error_Message(int errorCode) {
@@ -35,6 +36,7 @@ namespace Error_Codes {
         case Error_Codes::UNABLE_TO_CREATE_OUTPUT_FOLDER:    return "Unable to create the output folder!";
         case Error_Codes::UNABLE_TO_READ_OUTPUT_FOLDER:      return "Unable to read the output folder!";
         case Error_Codes::MULTIFILE_SUCCESS:                 return "The new merged files were generated successfully!";
+        case Error_Codes::SYNTAX_ERROR_IN_ID_FILE:           return "The ID file is not syntatically correct! Make sure that all of the tagged columns use the correct formatting!";
         default:                                             return "An unknown error has occurred!";
         }
     }
